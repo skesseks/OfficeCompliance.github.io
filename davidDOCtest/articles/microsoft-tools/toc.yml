@@ -1,0 +1,12 @@
+- name: How-Roslyn-Does-Real-Time-Intellisense
+  href: How-Roslyn-does-real-time-intellisense.md
+- name: Intellisense
+  href: Intellisense.md
+- name: Roslyn
+  href: Roslyn.md
+- name: Shared-Projects
+  href: Shared-Projects.md
+- name: VS-Doc-Features
+  href: VS-Doc-Features.md
+  homepage: ../index.md
+  

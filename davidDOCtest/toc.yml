@@ -1,0 +1,9 @@
+﻿# octothorpes mark comments. like this comment.
+- name: Articles # octothorpes work for line comments, too
+  href: articles/
+  homepage: articles/index.md
+- name: API
+  href: api/
+  homepage: api/index.md
+- name: Readme
+  href: README.md

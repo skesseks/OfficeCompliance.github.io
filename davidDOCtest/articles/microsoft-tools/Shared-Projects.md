@@ -1,0 +1,13 @@
+# What is a Shared Project?
+Shared Projects let you write common code that is referenced by a number of different application projects. The code is compiled as part of each referencing project and can include compiler directives to help incorporate platform-specific functionality into the shared code base.
+
+# Why is this useful?
+One of the goals of vNext is to allow all developers to edit their documentation in their native development environment as they code.  Some sort of "hooks" between the code and corresponding documentation would allow them to easily work on the two at one time.  Much of our documentation is shared between multiple code projects so lines of code from multiple projects would be "hooked" to the same document. The original intent of Shared Projects is more related to cross-platform sharing, but if we pretend our documentation is shared code we can leverage the concept as a way to share documentation between versions and SKUs.
+
+***
+# Related Resources
+* [Creating a Shared Project walkthrough](https://developer.xamarin.com/guides/cross-platform/application_fundamentals/shared_projects/) - for VS 2013 - there have been changes since
+* [Feature introduction video](https://microsoft-my.sharepoint.com/personal/mswarner_microsoft_com/_layouts/OneNote.aspx?id=%2Fpersonal%2Fmswarner_microsoft_com%2FDocuments%2FPrivate%20Documents%2FWork%20Notes&wd=target%28Future.one%7C359478D0-FC00-4EC0-ADC5-0C2601A9506F%2FResources%7C88FED2F5-C4D3-429E-B356-6F6B12231EF6%2F%29
+onenote:https://microsoft-my.sharepoint.com/personal/mswarner_microsoft_com/Documents/Private%20Documents/Work%20Notes/Future.one#Resources&section-id={359478D0-FC00-4EC0-ADC5-0C2601A9506F}&page-id={88FED2F5-C4D3-429E-B356-6F6B12231EF6}&object-id={0D77D291-1C71-0279-106F-48C77AB156F9}&14) and possibly more up to date walkthrough
+* [Universal Projects](https://microsoft-my.sharepoint.com/personal/mswarner_microsoft_com/_layouts/OneNote.aspx?id=%2Fpersonal%2Fmswarner_microsoft_com%2FDocuments%2FPrivate%20Documents%2FWork%20Notes&wd=target%28Future.one%7C359478D0-FC00-4EC0-ADC5-0C2601A9506F%2FResources%7C88FED2F5-C4D3-429E-B356-6F6B12231EF6%2F%29
+onenote:https://microsoft-my.sharepoint.com/personal/mswarner_microsoft_com/Documents/Private%20Documents/Work%20Notes/Future.one#Resources&section-id={359478D0-FC00-4EC0-ADC5-0C2601A9506F}&page-id={88FED2F5-C4D3-429E-B356-6F6B12231EF6}&object-id={0D77D291-1C71-0279-106F-48C77AB156F9}&16) - article

@@ -1,0 +1,13 @@
+- name: Internal Systems
+  href: internal-doc/toc.yml
+  homepage: internal-doc/index.md
+- name: Investigation Notes
+  href: investigation-notes/toc.yml
+  homepage: investigation-notes/index.md
+- name: Microsoft Tools
+  href: microsoft-tools/toc.yml
+  homepage: microsoft-tools/index.md
+- name: 3rd Party Tools
+  href: third-party/toc.yml
+  homepage: third-party/index.md
+ 

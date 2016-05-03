@@ -1,0 +1,116 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title> </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content=" ">
+    <meta name="generator" content="docfx 1.8.0.0">
+    
+    <link rel="shortcut icon" href="../../favicon.ico">
+    <link rel="stylesheet" href="../../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../../styles/docfx.css">
+    <link rel="stylesheet" href="../../styles/main.css">
+    <meta property="docfx:navrel" content="../../toc.html">
+    <meta property="docfx:tocrel" content="../toc.html">
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              <a class="navbar-brand" href="../../">
+                <img id="logo" class="svg" src="../../logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="">
+              <h1></h1>
+              <p><a href="http://stackoverflow.com/questions/9556026/a-new-and-full-implementation-of-generic-intellisense">Source</a></p>
+<p>How (in detail) do Microsoft implement their as-you-type Intellisense?</p>
+<p>I can describe it to any level of detail you care to name, but I don&#39;t have the time for more than a brief explanation. I&#39;ll explain how we do it in Roslyn.</p>
+<p>First, we build an immutable model of the token stream using a data structure that can efficiently represent edits, since obviously edits are precisely what there are going to be a lot of. </p>
+<p>The key insight to making it efficient for persistent reuse is to represent the character lengths of the tokens but not their character positions in the edit buffer; remember, a token at the end of the file is going to change position on every edit but the length of the token does not change. You must at all costs minimize the number of total re-lexings if you want to be efficient on extremely large files.</p>
+<p>Once you have an immutable model that can handle inserts and deletions to build up an immutable token stream without re-lexing the entire file every time, you then have to do the same thing, but for grammatical analysis. This is in practice a considerably harder problem. I recommend that you obtain an undergraduate or graduate degree in computer science with an emphasis on parser theory if you have not already. We obtained the help of people with PhDs who did their theses on parser theory to design this particular bit of the algorithm.</p>
+<p>Then, obviously, build a grammatical analyzer that can analyze C#. Remember, it has to analyze broken C#, not correct C#; IntelliSense has to work while the program is in a non-compiling state. So start by coming up with modifications to the grammar that have good error-recovery characteristics.</p>
+<p>OK, so now you&#39;ve got a parser that can efficiently do grammatical analysis without re-lexing or re-parsing anything but the edited region, most of the time, which means that you can do the work between keystrokes. I forgot to mention, of course you will need to come up with some mechanism to not block the UI thread while doing all of these analyses should the analysis happen to take longer than the time between two keystrokes. The new &quot;async/await&quot; feature of C# 5 should help with that. (I can tell you from personal experience: be careful with the proliferation of tasks and cancellation tokens. If you are careless, it is possible to get into a state where there are tens of thousands of cancelled tasks pending, and that is not fast.)</p>
+<p>Now that you&#39;ve got a grammatical analysis you need to build a semantic analyzer. Since you are only doing IntelliSense, it does not need to be a particularly sophisticated semantic analyzer. (Our semantic analyzer must do an analysis suitable for generating code from correct programs and correct error analysis from incorrect programs.) But of course, again it has to do good semantic analysis on broken programs, which does increase the complexity considerably.</p>
+<p>My advice is to start by building a &quot;top level&quot; semantic analyzer, again using an immutable model that can persist the state of the declared-in-source-code types from edit to edit. The top level analyzer deals with anything that is not a statement or expression: type declarations, directives, namespaces, method declarations, constructors, destructors, and so on. The stuff that makes up the &quot;shape&quot; of the program when the compiler generates metadata.</p>
+<p>Metadata! I forgot about metadata. You&#39;ll need a metadata reader. You need to be able to produce IntelliSense on expressions that refer to types in libraries, obviously. I recommend using the CCI libraries as your metadata reader, and not Reflection. Since you are only doing IntelliSense, obviously you don&#39;t need a metadata writer.</p>
+<p>Anyway, once you have a top-level semantic analyzer, then you can write a statement-and-expression semantic analyzer that analyzes the types of the expressions in a given statement. Pay particular attention to name lookup and overload resolution algorithms. Method type inference will be particularly tricky, especially inside LINQ queries.</p>
+<p>Once you&#39;ve got all that, an IntelliSense engine should be easy; just work out the type of the expression at the current cursor position and display a dropdown appropriately.</p>
+<p>how hard would it be for me to create my own of the same standard?</p>
+<p>Well, we&#39;ve got a team of, call it ten people, and it&#39;ll probably take, call it five years all together to get the whole thing done from start to finish. But we have lots more to do than just the IntelliSense engine. That&#39;s maybe only 40% of the work. Oh, and half those people work on VB, now that I think about it. But those people have on average probably five or ten years experience in doing this sort of work, so they&#39;re faster at it than you will be if you&#39;ve never done this before.</p>
+<p>So let&#39;s say it should take you about ten to twenty years of full time work, working alone, to build a Roslyn-quality IntelliSense engine for C# that can do acceptably-close-to-correct analysis of large programs in the time between keystrokes.</p>
+<p>Longer if you need to do that PhD first, obviously.</p>
+<p>Or, you could simply use Roslyn, since that&#39;s what it&#39;s for. That&#39;ll take you probably a few hours, but you don&#39;t get the fun of doing it yourself. And it is fun!</p>
+
+            </article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+            <!-- <p><a class="back-to-top" href="#top">Back to top</a><p> -->
+            </nav>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            <span>Copyright © 2015-2016 Microsoft<br>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../../styles/docfx.js"></script>
+    <script type="text/javascript" src="../../styles/main.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>
